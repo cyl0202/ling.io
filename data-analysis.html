@@ -3,59 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>数据分析技术 | 练习</title>
+<title>数据分析技术 | 代码练习</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 <style>
-body { background-color: #0f172a; color: #f1f5f9; }
-textarea, .result { font-family: Consolas, monospace; }
-.card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
-.btn { background-color: #2563eb; padding: 0.5rem 1rem; border-radius: 0.375rem; }
-.btn:disabled { background-color: #475569; cursor: not-allowed; }
+textarea, .output-area {
+    font-family: Consolas, monospace;
+    resize: none;
+}
 </style>
 </head>
-<body class="px-4 py-10">
-  <div class="max-w-4xl mx-auto">
-    <a href="index.html" class="text-blue-400 mb-6 inline-block">← 返回首页</a>
-    <h1 class="text-2xl font-bold mb-2">数据分析技术 · 实战练习</h1>
-    <p id="status" class="text-slate-400 mb-8">⏳ 加载Python环境中，请稍候...</p>
+<body class="bg-slate-900 text-gray-100 min-h-screen px-4 py-8">
+<div class="max-w-4xl mx-auto">
+    <!-- 返回链接 -->
+    <a href="index.html" class="text-blue-400 hover:underline mb-6 inline-block">← 返回首页</a>
+
+    <h1 class="text-2xl font-bold mb-2">数据分析技术 编程练习题</h1>
+    <p id="loadTip" class="text-slate-400 mb-8">正在加载Python运行环境，请稍候...</p>
 
     <script>
-    let py;
-    async function initPyodide() {
-      py = await loadPyodide();
-      document.getElementById("status").innerText = "✅ Python环境已就绪，可以开始答题";
-      document.querySelectorAll(".btn").forEach(btn => btn.disabled = false);
+    let pyEnv = null;
+    // 每道题预期输出结果
+    const standardAnswer = {
+        1: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10",
+        2: "10",
+        3: "13",
+        4: "[1, 2, 3, 4]",
+        5: "True",
+        6: "1\n2\n3",
+        7: "7",
+        8: "数据分析",
+        9: "12",
+        10: "[1 2 3]"
+    };
+
+    // 初始化Python环境
+    async function initEnv() {
+        pyEnv = await loadPyodide();
+        await pyEnv.loadPackage("numpy");
+        document.getElementById("loadTip").innerText = "✅ 环境加载完成，可以开始答题";
+        // 解锁所有运行按钮
+        document.querySelectorAll(".runBtn").forEach(btn => btn.disabled = false);
     }
-    initPyodide();
+    initEnv();
 
-    async function runCode(id) {
-      if (!py) {
-        document.getElementById(`r${id}`).innerText = "❌ 环境未就绪，请等待加载完成再运行";
-        return;
-      }
-      const code = document.getElementById(`c${id}`).value;
-      const resultDom = document.getElementById(`r${id}`);
-      try {
-        const output = await py.runPythonAsync(code);
-        resultDom.innerText = output !== undefined ? output : "✅ 运行完成，无输出";
-        resultDom.style.color = "#4ade80";
-      } catch (e) {
-        resultDom.innerText = "❌ 错误：" + e.message;
-        resultDom.style.color = "#f87171";
-      }
-    }
-    </script>
+    // 运行代码 + 校验答案
+    async function executeCode(questionId) {
+        if (!pyEnv) {
+            document.getElementById(`output${questionId}`).innerText = "❌ 环境未加载完成，请等待";
+            document.getElementById(`output${questionId}`).className = "output-area mt-3 p-3 bg-slate-800 rounded text-red-400";
+            return;
+        }
+        const codeContent = document.getElementById(`code${questionId}`).value;
+        const outputDom = document.getElementById(`output${questionId}`);
 
-    <!-- 第3题（你截图里的题） -->
-    <div class="card">
-      <h3 class="mb-3 font-medium">3. 计算 5+8</h3>
-      <textarea id="c3" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3 text-white" placeholder="在此编写代码"></textarea>
-      <button onclick="runCode(3)" class="btn mt-3" disabled>运行</button>
-      <div id="r3" class="result mt-3 p-3 bg-slate-900 rounded min-h-[40px]"></div>
-    </div>
+        try {
+            // 执行代码
+            const runResult = await pyEnv.runPythonAsync(codeContent);
+            const userOutput = String(runResult).trim();
+            const rightAnswer = standardAnswer[questionId];
 
-    <!-- 其他9道题也按这个格式写，把 id 改成 c1/c2/c4... 即可 -->
-  </div>
-</body>
-</html>
+            // 比对答案
+            if (userOutput === right
