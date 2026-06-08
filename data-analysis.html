@@ -6,104 +6,56 @@
 <title>数据分析技术 | 练习</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+<style>
+body { background-color: #0f172a; color: #f1f5f9; }
+textarea, .result { font-family: Consolas, monospace; }
+.card { background-color: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+.btn { background-color: #2563eb; padding: 0.5rem 1rem; border-radius: 0.375rem; }
+.btn:disabled { background-color: #475569; cursor: not-allowed; }
+</style>
 </head>
-<body class="bg-slate-900 text-white font-sans">
-<div class="max-w-4xl mx-auto px-4 py-10">
-    <a href="index.html" class="text-blue-400 mb-4 inline-block">← 返回主页</a>
+<body class="px-4 py-10">
+  <div class="max-w-4xl mx-auto">
+    <a href="index.html" class="text-blue-400 mb-6 inline-block">← 返回首页</a>
     <h1 class="text-2xl font-bold mb-2">数据分析技术 · 实战练习</h1>
-    <p id="status" class="text-slate-400 mb-6">加载Python环境中...</p>
+    <p id="status" class="text-slate-400 mb-8">⏳ 加载Python环境中，请稍候...</p>
 
     <script>
     let py;
-    async function init(){
-        py = await loadPyodide();
-        document.getElementById("status").innerText = "Python环境已就绪 ✅";
+    async function initPyodide() {
+      py = await loadPyodide();
+      document.getElementById("status").innerText = "✅ Python环境已就绪，可以开始答题";
+      document.querySelectorAll(".btn").forEach(btn => btn.disabled = false);
     }
-    init();
+    initPyodide();
 
-    async function run(id){
-        let code = document.getElementById("c"+id).value;
-        let out = document.getElementById("r"+id);
-        try {
-            let res = await py.runPythonAsync(code);
-            out.innerText = res !== undefined ? res : "运行完成";
-        } catch(e){
-            out.innerText = "错误：" + e.message;
-        }
+    async function runCode(id) {
+      if (!py) {
+        document.getElementById(`r${id}`).innerText = "❌ 环境未就绪，请等待加载完成再运行";
+        return;
+      }
+      const code = document.getElementById(`c${id}`).value;
+      const resultDom = document.getElementById(`r${id}`);
+      try {
+        const output = await py.runPythonAsync(code);
+        resultDom.innerText = output !== undefined ? output : "✅ 运行完成，无输出";
+        resultDom.style.color = "#4ade80";
+      } catch (e) {
+        resultDom.innerText = "❌ 错误：" + e.message;
+        resultDom.style.color = "#f87171";
+      }
     }
     </script>
 
-    <div class="space-y-6">
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">1. 输出 1~10</h3>
-            <textarea id="c1" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(1)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r1" class="mt-3 p-3 bg-slate-900 rounded text-green-400 min-h-[40px]"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">2. 定义 a=10 并打印</h3>
-            <textarea id="c2" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(2)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r2" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">3. 计算 5+8</h3>
-            <textarea id="c3" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(3)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r3" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">4. 创建列表 [1,2,3,4] 并输出</h3>
-            <textarea id="c4" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(4)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r4" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">5. 判断 6>3 并输出结果</h3>
-            <textarea id="c5" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(5)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r5" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">6. 循环输出 1,2,3</h3>
-            <textarea id="c6" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(6)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r6" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">7. 定义函数，两数相加</h3>
-            <textarea id="c7" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(7)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r7" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">8. 拼接字符串：数据 + 分析</h3>
-            <textarea id="c8" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(8)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r8" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">9. 求列表 [2,4,6] 总和</h3>
-            <textarea id="c9" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(9)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r9" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
-
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-            <h3 class="mb-2 font-medium">10. 创建 numpy 数组 [1,2,3]</h3>
-            <textarea id="c10" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3"></textarea>
-            <button onclick="run(10)" class="mt-2 px-4 py-2 bg-blue-600 rounded">运行</button>
-            <div id="r10" class="mt-3 p-3 bg-slate-900 rounded text-green-400"></div>
-        </div>
+    <!-- 第3题（你截图里的题） -->
+    <div class="card">
+      <h3 class="mb-3 font-medium">3. 计算 5+8</h3>
+      <textarea id="c3" class="w-full h-20 bg-slate-900 border border-slate-600 rounded p-3 text-white" placeholder="在此编写代码"></textarea>
+      <button onclick="runCode(3)" class="btn mt-3" disabled>运行</button>
+      <div id="r3" class="result mt-3 p-3 bg-slate-900 rounded min-h-[40px]"></div>
     </div>
-</div>
+
+    <!-- 其他9道题也按这个格式写，把 id 改成 c1/c2/c4... 即可 -->
+  </div>
 </body>
 </html>
